@@ -3,11 +3,11 @@
   "version": "0.1.1",
   "description": "js fetch manager",
   "main": "./dist/index.js",
+  "type": "module",
   "scripts": {
     "build": "tsup",
     "type-check": "tsc --pretty --noEmit"
   },
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/edsolater/jfetch.git"

@@ -57,7 +57,8 @@ export async function jFetchCoreWithCache(
         }
       })
       .catch(() => {
-        throw new Error('response .text() error')
+        return ''
+        // throw new Error('response .text() error')
       })
     const tempJFetchItem = {
       response,
