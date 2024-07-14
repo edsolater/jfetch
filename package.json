@@ -1,6 +1,6 @@
 {
   "name": "@edsolater/jfetch",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "js fetch manager",
   "main": "./dist/index.js",
   "type": "module",
@@ -19,17 +19,8 @@
   },
   "homepage": "https://github.com/edsolater/jfetch#readme",
   "devDependencies": {
-    "@types/node": "^18.7.23",
-    "@types/react": "^18.0.21",
-    "tsup": "^6.2.3",
-    "typescript": "^4.8.4"
-  },
-  "dependencies": {
-    "@edsolater/fnkit": "^0.1.8",
-    "react": "^18.2.0"
-  },
-  "peerDependencies": {
-    "@edsolater/fnkit": ">=0.0.5",
-    "react": ">=18.0.0"
+    "@edsolater/fnkit": "^0.1.93",
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.3"
   }
 }
