@@ -24,7 +24,7 @@ export type JFetchMiddlewareCacheOptions = {
 export function middlewareCache(options: JFetchMiddlewareCacheOptions): JFetchMiddlewareFn {
   return async ({ url }, next) => {
     const { cacheFreshTime = 1000, cacheStorePlace = "indexedDB" } = options
-    // const { originalOption } = userParams
+    // const { originalOptions } = userParams
     const key = url satisfies ResourceUrl
     const shouldUseCache = await canUseCache({
       key,

@@ -6,7 +6,7 @@ import { middlewareJsonifyTheResponse } from "./middlewares/jsonifyTheResponse"
 export type JFetchResponseItem = Response | undefined
 
 export type JFetchMiddlewareFn = (
-  ctx: { url: string; userParams?: { originalOption?: RequestInit } },
+  ctx: { url: string; userParams?: { originalOptions?: RequestInit } },
   next: () => Promise<JFetchResponseItem>,
 ) => Promise<JFetchResponseItem>
 
@@ -26,7 +26,7 @@ export interface JFetchMiddlewareOptions {
 }
 
 export interface JFetchOption extends JFetchMiddlewareOptions, JFetchMiddlewareCacheOptions {
-  originalOption?: RequestInit
+  originalOptions?: RequestInit
 }
 
 /**
@@ -35,7 +35,7 @@ export interface JFetchOption extends JFetchMiddlewareOptions, JFetchMiddlewareC
  */
 export async function jFetch<Shape = any>(input: RequestInfo, options?: JFetchOption): Promise<Shape | undefined> {
   const url = isString(input) ? input : input.url
-  const fetcherCore = () => fetch(input, options?.originalOption)
+  const fetcherCore = () => fetch(input, options?.originalOptions)
   const buildinMiddlewares = [
     middlewareJsonifyTheResponse(),
     middlewareUseTempPendingRequest(),
