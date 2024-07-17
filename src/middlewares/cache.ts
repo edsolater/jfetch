@@ -1,5 +1,5 @@
 import { isCurrentDateAfter, switchCase, type MayPromise } from "@edsolater/fnkit"
-import { type JFetchMiddlewareFn } from "../jFetch"
+import { type JFetchMiddleware } from "../jFetch"
 import { isResponse } from "../utils/isResponse"
 import {
   createIDBStoreManager,
@@ -21,7 +21,8 @@ export type JFetchMiddlewareCacheOptions = {
     | "indexedDB"
 }
 
-export function middlewareCache(options: JFetchMiddlewareCacheOptions): JFetchMiddlewareFn {
+/** handle raw response */
+export function middlewareCache(options: JFetchMiddlewareCacheOptions): JFetchMiddleware {
   return async ({ url }, next) => {
     const { cacheFreshTime = 1000, cacheStorePlace = "indexedDB" } = options
     // const { originalOptions } = userParams

@@ -1,32 +1,42 @@
 import { isString } from "@edsolater/fnkit"
 import { middlewareCache, type JFetchMiddlewareCacheOptions } from "./middlewares/cache"
-import { middlewareUseTempPendingRequest } from "./middlewares/cacheTempPendingRequest"
+import { middlewareCacheTempPendingRequest } from "./middlewares/cacheTempPendingRequest"
 import { middlewareJsonifyTheResponse } from "./middlewares/jsonifyTheResponse"
 
-export type JFetchResponseItem = Response | undefined
+export type JFetchResponseItem = any
 
-export type JFetchMiddlewareFn = (
+export type JFetchMiddleware = (
   ctx: { url: string; userParams?: { originalOptions?: RequestInit } },
   next: () => Promise<JFetchResponseItem>,
 ) => Promise<JFetchResponseItem>
 
 export interface JFetchMiddlewareOptions {
   /**
-   * first parse first item, then second, then third, ... , the last one, fetch core
+   * waterflow:
+   * 1. invoke first item, then second, then third, ... , the last one
+   * 2. fetch core
+   * 3. run the last one, then the second last one, ... , the first one
+   *
    * order: high -> low
-   * final stack: user middlewares-> build in middlewares -> lowest method(fetch core)
+   * midlewares-> build in middlewares -> lowest method(fetch core)
    * final stack:
-   * - user middlewares (in)
-   * --- build in middlewares (in)
+   * - user middlewares (in(code before next))
+   * --- build in middlewares (in(code before next))
    * ----- lowest method(fetch core)
-   * --- build in middlewares (out)
-   * - user middlewares (out)
+   * --- build in middlewares (out(code after next))
+   * - user middlewares (out(code after next))
    */
-  middlewares?: JFetchMiddlewareFn[]
+  middlewares?: JFetchMiddleware[]
 }
 
 export interface JFetchOption extends JFetchMiddlewareOptions, JFetchMiddlewareCacheOptions {
   originalOptions?: RequestInit
+  onFetchSuccess?: (payload: { rawResponse: Response }) => void
+}
+
+/** currently just a type function */
+export function createJFetchMiddleware(rawFn: JFetchMiddleware): JFetchMiddleware {
+  return rawFn
 }
 
 /**
@@ -34,16 +44,29 @@ export interface JFetchOption extends JFetchMiddlewareOptions, JFetchMiddlewareC
  * @todo if too large, cache in indexedDB instead of memory
  */
 export async function jFetch<Shape = any>(input: RequestInfo, options?: JFetchOption): Promise<Shape | undefined> {
-  const url = isString(input) ? input : input.url
-  const fetcherCore = () => fetch(input, options?.originalOptions)
-  const buildinMiddlewares = [
+  // lowest (with basic callback)
+  const fetcherCore = () =>
+    fetch(input, options?.originalOptions).then((res) => {
+      options?.onFetchSuccess?.({ rawResponse: res })
+      return res
+    })
+
+  // parse middlewares
+  const parsedBuildinMiddlewares = [
+    // high
     middlewareJsonifyTheResponse(),
-    middlewareUseTempPendingRequest(),
+    // low
+    middlewareCacheTempPendingRequest(),
+    // very low
     middlewareCache(options ?? {}),
   ]
-  const middlewares = (options?.middlewares ?? []).concat(buildinMiddlewares)
-  const getResponse = middlewares.reduceRight(
-    (prev: () => Promise<any>, current) => async () => current({ userParams: options, url: url }, prev),
+
+  const parsedMiddlewares = (options?.middlewares ?? []).concat(parsedBuildinMiddlewares)
+
+  const urlKey = isString(input) ? input : input.url
+
+  const getResponse = parsedMiddlewares.reduceRight(
+    (prev: () => Promise<any>, current) => async () => current({ userParams: options, url: urlKey }, prev),
     fetcherCore,
   )
 
