@@ -21,7 +21,9 @@ export type JFetchMiddlewareCacheOptions = {
     | "indexedDB"
 }
 
-/** handle raw response */
+/** handle raw response
+ * @TODO it should not be a build-in middleware, nodejs haven't indexedDB, localStorage, sessionStorage
+ */
 export function middlewareCache(options: JFetchMiddlewareCacheOptions): JFetchMiddleware {
   return async ({ url }, next) => {
     const { cacheFreshTime = 1000, cacheStorePlace = "indexedDB" } = options

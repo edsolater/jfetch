@@ -35,17 +35,15 @@ function createTempPendingRequest(url: string) {
   return { loadTempPendingRequest }
 }
 
-export function middlewareCacheTempPendingRequest(): JFetchMiddleware {
-  // console.log("static parse middlewareCacheTempPendingRequest")
-  return async ({ url }, next) => {
-    // console.log("run middlewareCacheTempPendingRequest before next")
-    if (hasTempPendingRequest(url)) {
-      return getTempPendingRequest(url)?.then((res) => res?.clone())
-    }
-    const { loadTempPendingRequest } = createTempPendingRequest(url)
-    const responsePromise = next()
-    // console.log("run middlewareCacheTempPendingRequest after next")
-    loadTempPendingRequest(responsePromise)
-    return responsePromise
+/**
+ * jfetch middleware: cache the on-going request(pending promise) to avoid duplicated request
+ */
+export const requestPendingCache: JFetchMiddleware = async ({ url }, next) => {
+  if (hasTempPendingRequest(url)) {
+    return getTempPendingRequest(url)?.then((res) => res?.clone())
   }
+  const { loadTempPendingRequest } = createTempPendingRequest(url)
+  const responsePromise = next()
+  loadTempPendingRequest(responsePromise)
+  return responsePromise
 }
